@@ -14,15 +14,15 @@ pipeline {
     stage('Build docker image') {
       steps {
         bat '''
-          docker build -t narang24/auth-service:${GIT_COMMIT} services/auth-service
+          docker build -t narang24/auth-service:%GIT_COMMIT% services/auth-service
         '''
       }
     }
     stage('Push docker image') {
       steps {
         bat '''
-          echo $DOCKER_CREDS_PSW | docker login -u $DOCKER_CREDS_USR --password-stdin
-          docker push narang24/auth-service:${GIT_COMMIT}
+          echo %DOCKER_CREDS_PSW% | docker login -u %DOCKER_CREDS_USR% --password-stdin
+          docker push narang24/auth-service:%GIT_COMMIT%
         '''
       }
     }
@@ -38,10 +38,10 @@ pipeline {
           git config user.name "narang24"
           git config user.email "narang24@gmail.com"
 
-          sed -i "s/tag:.*/tag: ${GIT_COMMIT}/" helm/auth/values.yaml
+          sed -i "s/tag:.*/tag: %GIT_COMMIT%/" helm/auth/values.yaml
           git add helm/auth/values.yaml
           git commit -m "ci: update auth image tag"
-          git push https://${GIT_USER}:${GIT_TOKEN}@github.com/narang24/microservices-vn.git main
+          git push https://%GIT_USER%:%GIT_TOKEN%@github.com/narang24/microservices-vn.git main
           '''
         }
       }
