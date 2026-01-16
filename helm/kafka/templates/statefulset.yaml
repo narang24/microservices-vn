@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: kafka-statefulset
+  namespace: dev-ns
+  labels:
+    app: kafka-statefulset
+spec:
+  replicas: {{.Values.replicas}}
+  serviceName: kafka-service
+  selector:
+    matchLabels:
+      app: kafka-statefulset
+  template:
+    metadata:
+      name: kafka-pod
+      labels:
+        app: kafka-statefulset
+    spec:
+      containers:
+        - name: kafka-container
+          image: "{{.Values.image.repository}}:{{.Values.image.tag}}"
+          ports: 
+            - containerPort: {{.Values.broker_port}}
+            - containerPort: {{.Values.controller_port}}
+          env:
+            - name: HOSTNAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+          command:
+            - sh
+            - -c
+            - |
+              export KAFKA_NODE_ID=${HOSTNAME##*-}
+              export KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://${HOSTNAME}.kafka-service.dev-ns.svc.cluster.local:9092
+              exec /etc/confluent/docker/run
+          envFrom:
+            - configMapRef:
+                name: kafka-config
+          volumeMounts:
+            - mountPath: "/var/lib/kafka/data"
+              name: kafka-volume
+  volumeClaimTemplates:
+    - metadata:
+        name: kafka-volume
+      spec:
+        resources:
+          requests:
+            storage: 1Gi
+        accessModes:
+          - ReadWriteOnce 

@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: invitation-service-deployment
+  namespace: dev-ns
+  labels:
+    app: invitation-service
+spec:
+  replicas: {{.Values.replicas}}
+  selector:
+    matchLabels:
+      app: invitation-service
+  template:
+    metadata:
+      name: invitation-pod
+      labels:
+        app: invitation-service
+    spec: 
+      containers:
+        - name: invitation-container
+          image: "{{.Values.image.repository}}:{{.Values.image.tag}}"
+          ports:
+            - containerPort: {{.Values.containerPort}}
+          envFrom:
+            - configMapRef:
+                name: invitation-service-config 
+            - secretRef:
+                name: invitation-service-secret

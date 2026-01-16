@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: email-service-deployment
+  namespace: dev-ns
+  labels:
+    app: email-service
+spec:
+  replicas: {{.Values.replicas}}
+  selector:
+    matchLabels:
+      app: email-service
+  template:
+    metadata:
+      name: email-pod
+      labels:
+        app: email-service
+    spec: 
+      containers:
+        - name: email-container
+          image: "{{.Values.image.repository}}:{{.Values.image.tag}}"
+          envFrom:
+            - configMapRef:
+                name: email-service-config 
+            - secretRef:
+                name: email-service-secret

@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: event-service-deployment
+  namespace: dev-ns
+  labels:
+    app: event-service
+spec:
+  replicas: {{.Values.replicas}}
+  selector:
+    matchLabels:
+      app: event-service
+  template:
+    metadata:
+      name: event-pod
+      labels:
+        app: event-service
+    spec: 
+      containers:
+        - name: event-container
+          image: "{{.Values.image.repository}}:{{.Values.image.tag}}"
+          ports:
+            - containerPort: {{.Values.containerPort}}
+          envFrom:
+            - configMapRef:
+                name: event-service-config 
+            - secretRef:
+                name: event-service-secret

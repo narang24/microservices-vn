@@ -1,0 +1,19 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: kafka-job 
+  namespace: dev-ns
+  labels:
+    app: kafka-job
+spec:
+  template:
+    metadata:
+      name: kafka-pod
+      labels:
+        app: kafka-job
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: kafka-container
+          image: "{{.Values.job_image.repository}}:{{.Values.job_image.tag}}"
+          # command: ["node", "../admin.js"]

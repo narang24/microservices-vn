@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka-service
+  namespace: dev-ns
+spec:
+  selector:
+    app: kafka-statefulset
+  clusterIP: None
+  ports:
+    - name: broker
+      port: {{.Values.broker_port}}
+      targetPort: {{.Values.broker_port}}
+    - name: controller
+      port: {{.Values.controller_port}}
+      targetPort: {{.Values.controller_port}}

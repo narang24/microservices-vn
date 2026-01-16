@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: status-service-deployment
+  namespace: dev-ns
+  labels:
+    app: status-service
+spec:
+  replicas: {{.Values.replicas}}
+  selector:
+    matchLabels:
+      app: status-service
+  template:
+    metadata:
+      name: status-pod
+      labels:
+        app: status-service
+    spec: 
+      containers:
+        - name: status-container
+          image: "{{.Values.image.repository}}:{{.Values.image.tag}}"
+          ports:
+            - containerPort: {{.Values.containerPort}}
+          envFrom:
+            - configMapRef:
+                name: status-service-config 

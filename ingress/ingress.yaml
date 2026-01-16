@@ -1,0 +1,39 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-service
+  namespace: dev-ns
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: app.local
+      http:
+        paths:
+          - path: /auth
+            pathType: Prefix
+            backend:
+              service:
+                name: auth-service
+                port:
+                  number: 80
+          - path: /event
+            pathType: Prefix
+            backend:
+              service:
+                name: event-service
+                port:
+                  number: 80
+          - path: /invitation
+            pathType: Prefix
+            backend:
+              service:
+                name: invitation-service
+                port:
+                  number: 80
+          - path: /status
+            pathType: Prefix
+            backend:
+              service:
+                name: status-service
+                port:
+                  number: 80
