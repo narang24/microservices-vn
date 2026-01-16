@@ -29,6 +29,9 @@ pipeline {
     stage('Update helm values') {
       steps {
         sh '''
+          git config user.name "narang24"
+          git config user.email "narang24@gmail.com"
+
           sed -i "s/tag:.*/tag: ${GIT_COMMIT}/" helm/auth/values.yaml
           git add helm/auth/values.yaml
           git commit -m "ci: update auth image tag"
