@@ -1,0 +1,42 @@
+pipeline {
+
+    agent any
+
+    environment {
+        DOCKER_CREDS = credentials('dockerhub_creds')
+    }
+
+    stages {
+        stage('Clone repo') {
+            steps {
+                git branch: 'main', url: 'https://github.com/narang24/microservices-vn'
+            }
+        }
+        stage('Build docker image') {
+            steps {
+                sh '''
+                    docker build -t narang24/status-service:${GIT_COMMIT} services/status-service
+                '''
+            }
+        }
+        stage('Push docker image') {
+            steps {
+                sh '''
+                    echo $DOCKER_CREDS_PSW | docker login -u DOCKER_CREDS_USR --password-stdin
+                    docker push narang24/status-service:${GIT_COMMIT}
+                '''
+            }
+        }
+        stage('Update helm values') {
+            steps {
+                sh '''
+                    sed -i "s/tag:.*/tag: ${GIT_COMMIT}/" helm/status/values.yaml
+                    git add helm/status/values.yaml
+                    git commit -m "ci: update status image tag"
+                    git push origin main
+                '''
+            }
+        }
+    }
+
+}
