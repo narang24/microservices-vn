@@ -8,35 +8,42 @@ pipeline {
   stages {
     stage('Clone repo') {
       steps {
-        git branch: 'main', url: 'https://github.com/narang24/microservices-vn', credentialsId: 'github-creds'
+        git branch: 'main', url: 'https://github.com/narang24/microservices-vn',credentialsId: 'github-creds'
       }
     }
     stage('Build docker image') {
       steps {
-        sh '''
-          docker build -t narang24/email-service:${GIT_COMMIT} services/email-service
+        bat '''
+          docker build -t narang24/email-service:%GIT_COMMIT% services/email-service
         '''
       }
     }
     stage('Push docker image') {
       steps {
-        sh '''
-          echo $DOCKER_CREDS_PSW | docker login -u $DOCKER_CREDS_USR --password-stdin
-          docker push narang24/email-service:${GIT_COMMIT}
+        bat '''
+          echo %DOCKER_CREDS_PSW% | docker login -u %DOCKER_CREDS_USR% --password-stdin
+          docker push narang24/email-service:%GIT_COMMIT%
         '''
       }
     }
     stage('Update helm values') {
       steps {
-        sh '''
+        withCredentials([usernamePassword(
+          credentialsId: 'github-creds',
+          usernameVariable: 'GIT_USER',
+          passwordVariable: 'GIT_TOKEN'
+        )]) 
+        {
+          bat '''
           git config user.name "narang24"
           git config user.email "narang24@gmail.com"
 
-          sed -i "s/tag:.*/tag: ${GIT_COMMIT}/" helm/email/values.yaml
+          sed -i "s/tag:.*/tag: %GIT_COMMIT%/" helm/email/values.yaml
           git add helm/email/values.yaml
           git commit -m "ci: update email image tag"
-          git push origin main
-        '''
+          git push https://%GIT_USER%:%GIT_TOKEN%@github.com/narang24/microservices-vn.git main
+          '''
+        }
       }
     }
   }
