@@ -1,0 +1,4 @@
+helm/auth/templates/secret.yaml
+helm/email/templates/secret.yaml
+helm/event/templates/secret.yaml
+helm/invitation/templates/secret.yaml
